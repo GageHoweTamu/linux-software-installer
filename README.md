@@ -57,3 +57,12 @@ This template should help get you started developing with Tauri, Solid and Types
 cd universal-installer
 npm install
 npm run tauri dev
+
+if you have issues, update npm and install vite.
+
+possible missing dependencies:
+apt-get install -y libgtk-3-dev
+sudo apt-get install -y libsoup2.4-dev
+sudo apt-get install -y libjavascriptcoregtk-4.0-dev
+etc
+export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig
