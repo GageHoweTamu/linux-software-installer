@@ -17,37 +17,28 @@ fn read_file(filename: &str) -> String { // return file content as a string
     }
 }
 
-/*
-# sample installScript for Spotify
-[Debian]
-curl -sS https://download.spotify.com/debian/pubkey_6224F9941A8AA6D1.gpg | sudo gpg --dearmor --yes -o /etc/apt/trusted.gpg.d/spotify.gpg
-echo "deb http://repository.spotify.com stable non-free" | sudo tee /etc/apt/sources.list.d/spotify.list
-sudo apt-get update && sudo apt-get install spotify-client
-[Ubuntu]
-snap install spotify
-#[other distros etc]
-[end]
- */
 // from javascript: call read_file -> parse_script -> run_bash_script
 // we need to implement this in Solid.js
 // buttons to (select the installScript) and (run the script), with a script preview on the side
 // two sides of the ui: install local file, and install from store. install from store will depend on a website/api, and is not important yet.
 // The install local file side will be the focus. We need to be able to read the file, parse the script, and run the script.
 
-/*
-#[tauri::command]   // this function reads the installScript and returns a string depending on the OS
-                    // Then fn run_bash_script is called with the returned string
-fn parse_script(script: &str) -> Result<String, std::io::Error> {
-    let os = os_info::get(); // get the OS info
+#[tauri::command]   
+fn parse_script(script: &str) -> String {
+    let os = os_info::get(); 
     let os_name = os.os_type();
     let mut script_path = String::new();
     let mut script_lines = script.lines();
     let mut line = script_lines.next();
     while line.is_some() {
-        if line.unwrap().contains(&os_name) {
+        let line_str = match line {
+            Some(l) => l,
+            None => return "Error: Failed to read line".to_string(),
+        };
+        if line_str.contains(&os_name.to_string()) {
             line = script_lines.next();
-            while line.is_some() && !line.unwrap().contains("[end]") {
-                script_path.push_str(line.unwrap());
+            while line.is_some() && !line_str.contains("[end]") {
+                script_path.push_str(line_str);
                 script_path.push('\n');
                 line = script_lines.next();
             }
@@ -55,11 +46,11 @@ fn parse_script(script: &str) -> Result<String, std::io::Error> {
         }
         line = script_lines.next();
     }
-    Ok(script_path)
+    script_path
 }
 
-#[tauri::command]
-fn run_bash_script(script_path: &str) -> Result<(), tauri::Error> { // runs the selected bash script
+#[tauri::command] // runs the selected bash script
+fn run_bash_script(script_path: &str) -> String {
     let mut command = std::process::Command::new("bash");
     command.arg(script_path);
 
@@ -69,13 +60,12 @@ fn run_bash_script(script_path: &str) -> Result<(), tauri::Error> { // runs the 
     } else {
         eprintln!("Script execution failed with exit code: {}", status.code().unwrap_or(-1));
     }
-    Ok(())
+    "ran script"
 }
-*/
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, read_file]) // update this when adding new functions
+        .invoke_handler(tauri::generate_handler![greet, read_file, parse_script]) // update this when adding new functions
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -10,21 +10,26 @@ function App() {
   const [name, setName] = createSignal("");
   const [fileContent, setFileContent] = createSignal("");
   const [message, setMessage] = createSignal("");
+  const [mode, setMode] = createSignal("left"); // mode for switchable windows
+
+  const toggleMode = () => {
+    setMode(mode() === "left" ? "right" : "left");
+  };
 
   async function handleRunButtonClick() {
-    console.log("Button clicked");
-    const result = await open({ multiple: false });
-    console.log(result);
-    if (!result) {
-      return;
-      console.log("No file selected");
+    try {
+      setMessage("Loading...");
+      const result = await open({ multiple: false });
+      setMessage("done");
+      const filename = Array.isArray(result) ? result[0] : result;
+      const content = await invoke("read_file", { filename });
+      setMessage(content as string);
+    } catch (error) {
+      console.error('Error:', error);
+      setMessage("An error occurred: " + JSON.stringify(error));
     }
-    const filename = Array.isArray(result) ? result[0] : result;
-    const content = await invoke("read_file", { filename });
-    console.log(content);
-    setMessage(content as string);
   }
-
+  
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
     setGreetMsg(await invoke("greet", { name: name() }));
@@ -38,47 +43,39 @@ function App() {
     setGreetMsg(await invoke("read_file", { file: fileContent() }));
     return fileContent();
   }
-
   return (
-    <div class="container">
-      <h1>Welcome to Tauri!</h1>
-
-      <div class="row">
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://solidjs.com" target="_blank">
-          <img src={logo} class="logo solid" alt="Solid logo" />
-        </a>
-      </div>
+    <div>
+      <button onClick={toggleMode}>Switch Mode</button>
+      {mode() === "left" && (
         <div>
-        <button onClick={handleRunButtonClick}>Click me</button>
-        <p>{message()}</p>
-      </div>
-
-      <p>Click on the Tauri, Vite, and Solid logos to learn more.</p>
-
-      <form
-        class="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-
-      <p>{greetMsg()}</p>
+          <h1>Open a local InstallScript</h1>
+          <button onClick={handleRunButtonClick}>Click me</button>
+          <p>{message()}</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              greet();
+            }}
+          >
+            <input
+              id="greet-input"
+              onChange={(e) => setName(e.currentTarget.value)}
+              placeholder="..."
+            />
+            <button type="submit">buttonText</button>
+          </form>
+          <p>{greetMsg()}</p>
+        </div>
+      )}
+      {mode() === "right" && (
+        <div>
+          <h2>Search the store</h2>
+          <input type="search" id="search-input" placeholder="..." />
+          {/* ... other right side content ... */}
+        </div>
+      )}
     </div>
-  );
+ );
 }
 
 export default App;
