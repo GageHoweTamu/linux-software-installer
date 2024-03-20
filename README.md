@@ -48,7 +48,7 @@ snap install spotify
 
 # Tauri + Solid + Typescript
 
-This template should help get you started developing with Tauri, Solid and Typescript in Vite.
+Tauri, Solid and Typescript in Vite
 
 ## Recommended IDE Setup
 
@@ -61,8 +61,8 @@ npm run tauri dev
 if you have issues, update npm and install vite.
 
 possible missing dependencies:
-apt-get install -y libgtk-3-dev
-sudo apt-get install -y libsoup2.4-dev
-sudo apt-get install -y libjavascriptcoregtk-4.0-dev
+sudo apt-get install -y libgtk-3-dev (and other core libraries)
+cargo install tauri-cli
+sudo npm install --global yarn
 etc
 export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig

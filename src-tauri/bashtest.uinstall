@@ -1,0 +1,23 @@
+: <<'END'
+
+This is a .uinstall file, used by the UInstaller software for Linux.
+UInstaller allows fast and easy software installation for many Linux distrobutions.
+To use this file, simply open it with UInstaller.
+
+END
+
+os_type=$(source /etc/os-release; echo $ID)
+if [[ "$os_type" == "kali" ]]; then
+  echo "spotify was installed with curl"
+  
+elif [[ "$os_type" == "ubuntu" ]]; then
+  if [[ $(command -v snap) ]]; then
+    echo "spotify was installed with snap"
+  else
+    echo "spotify was installed with apt"
+  fi
+
+else
+  echo "nothing happened"
+  echo $os_type
+fi

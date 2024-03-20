@@ -7,54 +7,62 @@ import { open } from "@tauri-apps/api/dialog";
 
 function App() {
   const [greetMsg, setGreetMsg] = createSignal("");
-  const [name, setName] = createSignal("");
-  const [fileContent, setFileContent] = createSignal("");
-  const [message, setMessage] = createSignal("");
-  const [mode, setMode] = createSignal("left"); // mode for switchable windows
 
+  const [name, setName] = createSignal("");
+
+  const [fileContent, setFileContent] = createSignal(""); // the content of the file
+
+  const [scriptPreview, setScriptPreview] = createSignal("");
+  const [scriptOutput, setScriptOutput] = createSignal("");
+
+  const [mode, setMode] = createSignal("left"); // mode for switchable windows
   const toggleMode = () => {
     setMode(mode() === "left" ? "right" : "left");
   };
 
+  const [filePath, setfilePath] = createSignal("/home/kali/Downloads/test2.uinstall"); // file path for install script
+
   async function handleRunButtonClick() {
     try {
-      setMessage("Loading...");
+      setScriptPreview("Loading...");
       const result = await open({ multiple: false });
-      setMessage("done");
+      setScriptPreview("done");
       const filename = Array.isArray(result) ? result[0] : result;
       const content = await invoke("read_file", { filename });
-      setMessage(content as string);
+      const returned = await invoke("run_bash", { filepath: filename });
+      setScriptPreview(content as string);
+      setScriptOutput(returned as string);
+      if (filename) {
+        setfilePath(filename);
+      } else {
+        console.error('No file selected');
+      }
     } catch (error) {
       console.error('Error:', error);
-      setMessage("An error occurred: " + JSON.stringify(error));
+      setScriptPreview("An error occurred: " + JSON.stringify(error));
     }
   }
-  
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetMsg(await invoke("greet", { name: name() }));
-  }
 
-  /* #[tauri::command]
-  fn read_file(filename: &str) -> Result<String, std::io::Error> { // convert file content to string
-      std::fs::read_to_string(filename)
-  } */
   async function read_file() {
     setGreetMsg(await invoke("read_file", { file: fileContent() }));
     return fileContent();
   }
+  async function run_bash() {
+    setGreetMsg(await invoke("run_script", { file: fileContent() }));
+    return fileContent();
+  }
+
   return (
     <div>
       <button onClick={toggleMode}>Switch Mode</button>
       {mode() === "left" && (
         <div>
           <h1>Open a local InstallScript</h1>
-          <button onClick={handleRunButtonClick}>Click me</button>
-          <p>{message()}</p>
+          <button onClick={handleRunButtonClick}>Load .uinstall file</button>
+          <p>{scriptPreview()}</p>
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              greet();
             }}
           >
             <input
@@ -65,6 +73,7 @@ function App() {
             <button type="submit">buttonText</button>
           </form>
           <p>{greetMsg()}</p>
+          <p>{scriptOutput()}</p>
         </div>
       )}
       {mode() === "right" && (
