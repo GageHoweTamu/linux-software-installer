@@ -21,8 +21,6 @@ sudo apt install npm
 To build:    
 ```npm run tauri dev``` in src-tauri
 
-```
-
 # Tauri + Solid + Typescript
 
 Tauri, Solid and Typescript in Vite
